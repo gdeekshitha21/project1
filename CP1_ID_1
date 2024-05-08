@@ -1,0 +1,58 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+class OrangeHRMLoginPage:
+    def __init__(self, driver):
+        self.driver = driver
+        self.username_locator = (By.ID, "txtUsername")
+        self.password_locator = (By.ID, "txtPassword")
+        self.login_button_locator = (By.ID, "btnLogin")
+
+    def enter_username(self, username):
+        self.driver.find_element(*self.username_locator).send_keys(username)
+
+    def enter_password(self, password):
+        self.driver.find_element(*self.password_locator).send_keys(password)
+
+    def click_login_button(self):
+        self.driver.find_element(*self.login_button_locator).click()
+
+class OrangeHRMDashboardPage:
+    def __init__(self, driver):
+        self.driver = driver
+        self.dashboard_locator = (By.ID, "dashboard")
+
+# Test data
+username = "admin"
+password = "admin123"
+
+# Initialize WebDriver and open OrangeHRM site
+driver = webdriver.Chrome()
+driver.get("http://example.com/orangehrm")
+
+# Initialize Page Objects
+login_page = OrangeHRMLoginPage(driver)
+dashboard_page = OrangeHRMDashboardPage(driver)
+
+# Enter username and password
+login_page.enter_username(username)
+login_page.enter_password(password)
+
+# Click login button
+login_page.click_login_button()
+
+# Implicit wait for the dashboard page to load
+wait = WebDriverWait(driver, 10)
+wait.until(EC.visibility_of_element_located(dashboard_page.dashboard_locator))
+
+# Verification of successful login
+dashboard_element = driver.find_element(*dashboard_page.dashboard_locator)
+if dashboard_element.is_displayed():
+    print("Login successful. Dashboard page is displayed.")
+else:
+    print("Login failed. Dashboard page is not displayed.")
+
+# Close the browser
+driver.quit()

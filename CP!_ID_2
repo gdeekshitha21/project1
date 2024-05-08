@@ -1,0 +1,56 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+class OrangeHRMLoginPage:
+    def __init__(self, driver):
+        self.driver = driver
+        self.username_locator = (By.ID, "txtUsername")
+        self.password_locator = (By.ID, "txtPassword")
+        self.login_button_locator = (By.ID, "btnLogin")
+        self.error_message_locator = (By.ID, "spanMessage")
+
+    def enter_username(self, username):
+        self.driver.find_element(*self.username_locator).send_keys(username)
+
+    def enter_password(self, password):
+        self.driver.find_element(*self.password_locator).send_keys(password)
+
+    def click_login_button(self):
+        self.driver.find_element(*self.login_button_locator).click()
+
+    def get_error_message(self):
+        return self.driver.find_element(*self.error_message_locator).text if self.driver.find_element(*self.error_message_locator).is_displayed() else None
+
+# Test data
+username = "Admin"
+invalid_password = "InvalidPassword"
+expected_error_message = "Invalid credentials"
+
+# Initialize WebDriver and open OrangeHRM site
+driver = webdriver.Chrome()
+driver.get("http://example.com/orangehrm")
+
+# Initialize Page Object
+login_page = OrangeHRMLoginPage(driver)
+
+# Enter invalid username and password
+login_page.enter_username(username)
+login_page.enter_password(invalid_password)
+
+# Click login button
+login_page.click_login_button()
+
+# Implicit wait for the error message to appear
+wait = WebDriverWait(driver, 10)
+error_message = wait.until(EC.visibility_of_element_located(login_page.error_message_locator)).text
+
+# Verification of error message
+if error_message == expected_error_message:
+    print("Test passed: Correct error message displayed for invalid login attempt.")
+else:
+    print("Test failed: Incorrect error message displayed for invalid login attempt.")
+
+# Close the browser
+driver.quit()

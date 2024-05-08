@@ -1,0 +1,67 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
+
+class OrangeHRM:
+    def __init__(self, driver):
+        self.driver = driver
+        self.wait = WebDriverWait(self.driver, 10)
+
+    def login(self, username, password):
+        self.driver.get("https://your_orange_hrm_site_url")
+        username_field = self.wait.until(EC.visibility_of_element_located((By.ID, "txtUsername")))
+        username_field.send_keys(username)
+        password_field = self.driver.find_element(By.ID, "txtPassword")
+        password_field.send_keys(password)
+        login_button = self.driver.find_element(By.ID, "btnLogin")
+        login_button.click()
+
+    def navigate_to_pim_module(self):
+        pim_module = self.wait.until(EC.element_to_be_clickable((By.ID, "menu_pim_viewPimModule")))
+        pim_module.click()
+
+    def add_new_employee(self, first_name, last_name):
+        add_button = self.wait.until(EC.element_to_be_clickable((By.ID, "btnAdd")))
+        add_button.click()
+        first_name_field = self.wait.until(EC.visibility_of_element_located((By.ID, "firstName")))
+        first_name_field.send_keys(first_name)
+        last_name_field = self.driver.find_element(By.ID, "lastName")
+        last_name_field.send_keys(last_name)
+        save_button = self.driver.find_element(By.ID, "btnSave")
+        save_button.click()
+
+    def verify_employee_added_successfully(self):
+        try:
+            success_message = self.wait.until(EC.visibility_of_element_located((By.XPATH, "//div[@class='message success']")))
+            return "Employee added successfully" in success_message.text
+        except (NoSuchElementException, TimeoutException):
+            return False
+
+if __name__ == "__main__":
+    driver = webdriver.Chrome()  # You may need to specify the path to your chromedriver executable
+    orange_hrm = OrangeHRM(driver)
+    
+    try:
+        # Login
+        orange_hrm.login("your_username", "your_password")
+        
+        # Navigate to PIM module
+        orange_hrm.navigate_to_pim_module()
+        
+        # Add new employee
+        orange_hrm.add_new_employee("John", "Doe")
+        
+        # Verify employee addition
+        if orange_hrm.verify_employee_added_successfully():
+            print("Test passed: Employee added successfully")
+        else:
+            print("Test failed: Employee addition unsuccessful")
+    
+    except Exception as e:
+        print("An error occurred:", e)
+    
+    finally:
+        driver.quit()
+        
